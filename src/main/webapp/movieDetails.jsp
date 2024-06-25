@@ -19,7 +19,6 @@
         String apiKey = "bb654568604492b2afe0260d26333c44"; // Replace with your actual TMDB API key
         String movieDetailsUrl = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + apiKey;
         String movieReviewsUrl = "https://api.themoviedb.org/3/movie/" + movieId + "/reviews?api_key=" + apiKey;
-        System.out.println(movieReviewsUrl);
 
         try {
             // Fetch movie details
@@ -38,6 +37,15 @@
             double voteAverage = movie.get("vote_average").getAsDouble();
             int voteCount = movie.get("vote_count").getAsInt();
             String posterPath = movie.has("poster_path") && !movie.get("poster_path").isJsonNull() ? movie.get("poster_path").getAsString() : null;
+            JsonArray genresArray = movie.getAsJsonArray("genres");
+            String genres = "";
+            for (int i = 0; i < genresArray.size(); i++) {
+                JsonObject genre = genresArray.get(i).getAsJsonObject();
+                genres += genre.get("name").getAsString();
+                if (i < genresArray.size() - 1) {
+                    genres += ", ";
+                }
+            }
 
 %>
 <div class="movie-details-container">
@@ -47,6 +55,7 @@
     <div class="movie-info">
         <h2><%= title %></h2>
         <p><strong>Overview:</strong> <%= overview %></p>
+        <p><strong>Genres:</strong> <%= genres %></p>
         <p><strong>Release Date:</strong> <%= releaseDate %></p>
         <p><strong>Original Language:</strong> <%= originalLanguage %></p>
         <p><strong>Popularity:</strong> <%= popularity %></p>
