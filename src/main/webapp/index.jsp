@@ -58,7 +58,7 @@
 
                         let moviesHtml = "";
                         for (let i = 0; i < movies.length; i++) {
-                            moviesHtml += "<div class='movie'>" +
+                            moviesHtml += "<div class='movie' onclick='window.location.href=\"movieDetails.jsp?id=" + movies[i].id + "\"'>" +
                                 (movies[i].poster_path ? "<img src='https://image.tmdb.org/t/p/w500" + movies[i].poster_path + "' alt='" + movies[i].title + "'>" : "") +
                                 "<div class='movie-details'>" +
                                 "<h2>" + movies[i].title + "</h2>" +

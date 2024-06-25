@@ -41,7 +41,7 @@ select {
 }
 
 input[type="checkbox"] {
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 input[type="submit"] {
@@ -94,6 +94,7 @@ input[type="submit"]:hover {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
+    cursor: pointer; /* Add pointer cursor to indicate clickable div */
 }
 
 .movie img {
@@ -118,4 +119,67 @@ input[type="submit"]:hover {
 
 .movie-details p strong {
     color: #333;
+}
+
+.movie-details-container {
+    display: flex; /* Display image and information side by side */
+    align-items: flex-start;
+    text-align: left;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.movie-poster {
+    margin-right: 20px;
+    border-radius: 8px;
+    max-width: 300px; /* Increased size */
+}
+
+.movie-info {
+    flex-grow: 1;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #5cb85c;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+.reviews-container {
+    margin-top: 20px;
+    width: 80%;
+    max-width: 800px;
+    margin-bottom: 40px; /* Add larger bottom margin */
+}
+
+.review {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.review p {
+    margin: 5px 0;
+}
+
+.review p strong {
+    color: #333;
+}
+
+.no-reviews {
+    margin-bottom: 40px; /* Add larger bottom margin */
 }
