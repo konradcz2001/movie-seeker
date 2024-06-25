@@ -3,11 +3,22 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100vh;
+    min-height: 100vh;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 10px;
 }
 
 h1 {
@@ -15,29 +26,54 @@ h1 {
     margin-top: 20px;
 }
 
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+    color: #e0e0e0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 form {
     margin: 20px 0;
-    position: relative; /* Relative positioning for the form */
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
 input[type="text"] {
     padding: 10px;
-    width: 300px; /* Wide input for the movie title */
+    width: 300px;
     border: 1px solid #ccc;
     border-radius: 4px;
     margin-right: 10px;
 }
 
+body.dark-mode input[type="text"] {
+    background-color: #333;
+    border: 1px solid #555;
+    color: #e0e0e0;
+}
+
 select {
     padding: 10px;
-    width: 150px; /* Smaller width for select elements */
+    width: 150px;
     border: 1px solid #ccc;
     border-radius: 4px;
     margin-right: 10px;
+}
+
+body.dark-mode select {
+    background-color: #333;
+    border: 1px solid #555;
+    color: #e0e0e0;
 }
 
 input[type="checkbox"] {
@@ -64,26 +100,41 @@ input[type="submit"]:hover {
     max-height: 200px;
     overflow-y: auto;
     position: absolute;
-    top: 40px;  /* Adjust according to your input box height */
+    top: 40px;
     left: 0;
     z-index: 1000;
-    box-sizing: border-box; /* Ensure padding and border are included in the element's width and height */
-    display: none; /* Initially hidden */
+    box-sizing: border-box;
+    display: none;
+    width: calc(100% - 20px);
+}
+
+body.dark-mode #suggestions {
+    border: 1px solid #555;
+    background-color: #333;
 }
 
 #suggestions p {
     padding: 10px;
     margin: 0;
     cursor: pointer;
+    color: #333;
+}
+
+body.dark-mode #suggestions p {
+    color: #e0e0e0;
 }
 
 #suggestions p:hover {
     background-color: #f4f4f4;
 }
 
+body.dark-mode #suggestions p:hover {
+    background-color: #555;
+}
+
 #results {
-    width: 80%;
-    max-width: 800px;
+    width: 90%;
+    max-width: 1000px;
     margin-top: 20px;
 }
 
@@ -94,17 +145,26 @@ input[type="submit"]:hover {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
-    cursor: pointer; /* Add pointer cursor to indicate clickable div */
+    cursor: pointer;
+    align-items: flex-start;
+}
+
+body.dark-mode .movie {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .movie img {
     border-radius: 8px;
-    max-width: 150px;
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
     margin-right: 20px;
 }
 
 .movie-details {
-    max-width: 600px;
+    flex: 1;
+    min-width: 0;
 }
 
 .movie-details h2 {
@@ -112,35 +172,76 @@ input[type="submit"]:hover {
     color: #333;
 }
 
+body.dark-mode .movie-details h2 {
+    color: #e0e0e0;
+}
+
 .movie-details p {
     margin: 5px 0;
     color: #666;
+}
+
+body.dark-mode .movie-details p {
+    color: #b0b0b0;
 }
 
 .movie-details p strong {
     color: #333;
 }
 
+body.dark-mode .movie-details p strong {
+    color: #e0e0e0;
+}
+
 .movie-details-container {
-    display: flex; /* Display image and information side by side */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
     align-items: flex-start;
-    text-align: left;
     background-color: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-width: 800px;
-    margin-top: 20px;
+    margin: 20px auto;
+    width: 100%;
+}
+
+body.dark-mode .movie-details-container {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .movie-poster {
+    max-width: 300px;
+    width: 100%;
     margin-right: 20px;
     border-radius: 8px;
-    max-width: 300px; /* Increased size */
 }
 
 .movie-info {
-    flex-grow: 1;
+    flex: 1;
+    text-align: left;
+}
+
+@media (max-width: 600px) {
+    .movie {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .movie img {
+        width: 100%;
+        height: auto;
+        max-width: 300px;
+        max-height: 450px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .movie-details {
+        width: 100%;
+    }
 }
 
 button {
@@ -150,7 +251,7 @@ button {
     color: white;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 20px;
+    /*margin-top: 20px;*/
 }
 
 button:hover {
@@ -159,9 +260,12 @@ button:hover {
 
 .reviews-container {
     margin-top: 20px;
-    width: 80%;
+    width: 100%;
     max-width: 800px;
-    margin-bottom: 40px; /* Add larger bottom margin */
+    margin: 20px auto 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .review {
@@ -170,6 +274,14 @@ button:hover {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
+    width: 100%;
+    max-width: 800px;
+    text-align: left;
+}
+
+body.dark-mode .review {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .review p {
@@ -180,6 +292,76 @@ button:hover {
     color: #333;
 }
 
+body.dark-mode .review p strong {
+    color: #e0e0e0;
+}
+
 .no-reviews {
-    margin-bottom: 40px; /* Add larger bottom margin */
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    .movie-details-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .movie-poster {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .movie-info {
+        width: 100%;
+    }
+
+    form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    input[type="text"],
+    select,
+    input[type="submit"] {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    input[type="checkbox"] {
+        align-self: flex-start;
+    }
+
+    .sort-order-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .sort-order-container label {
+        margin-right: 10px;
+    }
+}
+
+.header-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header-container h1 {
+    margin-bottom: 10px;
+}
+
+.header-container button {
+    display: inline-block;
+}
+
+.theme-toggle {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle label {
+    margin-right: 10px;
 }
