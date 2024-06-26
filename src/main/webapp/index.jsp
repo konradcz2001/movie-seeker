@@ -5,9 +5,9 @@
 <html>
 <head>
     <title>Movie Search</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="theme.js" defer></script>
-    <script src="suggestions.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="js/theme.js" defer></script>
+    <script src="js/suggestions.js" defer></script>
 </head>
 <body>
 <h1>Movie Seeker</h1>

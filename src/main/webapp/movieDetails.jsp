@@ -6,8 +6,8 @@
 <html>
 <head>
     <title>Movie Details</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="theme.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="js/theme.js" defer></script>
 </head>
 <body>
 <div class="container">

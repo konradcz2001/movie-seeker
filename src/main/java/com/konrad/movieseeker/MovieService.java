@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieService {
-    private static final String API_KEY = "bb654568604492b2afe0260d26333c44";
+    private static final String API_KEY = ApiKey.apiKey;
     private static final String SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=" + API_KEY + "&query=";
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIE_REVIEWS_URL = "https://api.themoviedb.org/3/movie/";

@@ -11,7 +11,7 @@ import java.io.IOException;
 @WebServlet("/movieDetails")
 public class MovieDetailsServlet extends HttpServlet {
 
-    private MovieService movieService = new MovieService();
+    private final MovieService movieService = new MovieService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
