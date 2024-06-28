@@ -11,12 +11,26 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * The MovieService class provides methods to interact with the Movie Database API.
+ * It allows searching for movies based on a query string, retrieving details of a specific movie,
+ * fetching movie reviews, and creating Movie objects from JSON data.
+ * The class handles HTTP connections to the API endpoints and parses JSON responses to populate Movie and Review objects.
+ */
 public class MovieService {
     private static final String API_KEY = ApiKey.apiKey;
     private static final String SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=" + API_KEY + "&query=";
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIE_REVIEWS_URL = "https://api.themoviedb.org/3/movie/";
 
+
+    /**
+     * Searches for movies based on the provided query string.
+     *
+     * @param query The search query string to look for movies
+     * @return A list of Movie objects representing the search results
+     */
     public List<Movie> searchMovies(String query) {
         List<Movie> movies = new ArrayList<>();
         try {
@@ -30,18 +44,7 @@ public class MovieService {
 
             for (int i = 0; i < results.size(); i++) {
                 JsonObject movieJson = results.get(i).getAsJsonObject();
-                Movie movie = new Movie();
-
-                movie.setId(movieJson.get("id").getAsInt());
-                movie.setTitle(getAsString(movieJson, "title"));
-                movie.setOverview(getAsString(movieJson, "overview"));
-                movie.setRelease_date(getAsString(movieJson, "release_date"));
-                movie.setPoster_path(getAsString(movieJson, "poster_path"));
-                movie.setOriginal_language(getAsString(movieJson, "original_language"));
-                movie.setPopularity(getAsDouble(movieJson, "popularity"));
-                movie.setVote_average(getAsDouble(movieJson, "vote_average"));
-                movie.setVote_count(getAsInt(movieJson, "vote_count"));
-
+                Movie movie = createMovie(movieJson);
                 movies.add(movie);
             }
         } catch (Exception e) {
@@ -50,6 +53,14 @@ public class MovieService {
         return movies;
     }
 
+    /**
+     * Retrieves details of a movie based on the provided movieId.
+     * This method fetches information about the movie, including its genres and reviews.
+     *
+     * @param movieId The unique identifier of the movie for which to retrieve details
+     * @return A Movie object representing the details of the movie, including genres and reviews
+     *         or null if an error occurs during the retrieval process
+     */
     public Movie getMovieDetails(int movieId) {
         try {
             URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY);
@@ -58,17 +69,7 @@ public class MovieService {
 
             InputStreamReader reader = new InputStreamReader(conn.getInputStream());
             JsonObject movieJson = JsonParser.parseReader(reader).getAsJsonObject();
-            Movie movie = new Movie();
-
-            movie.setId(movieJson.get("id").getAsInt());
-            movie.setTitle(getAsString(movieJson, "title"));
-            movie.setOverview(getAsString(movieJson, "overview"));
-            movie.setRelease_date(getAsString(movieJson, "release_date"));
-            movie.setPoster_path(getAsString(movieJson, "poster_path"));
-            movie.setOriginal_language(getAsString(movieJson, "original_language"));
-            movie.setPopularity(getAsDouble(movieJson, "popularity"));
-            movie.setVote_average(getAsDouble(movieJson, "vote_average"));
-            movie.setVote_count(getAsInt(movieJson, "vote_count"));
+            Movie movie = createMovie(movieJson);
 
             JsonArray genresArray = movieJson.getAsJsonArray("genres");
             List<Movie.Genre> genres = new ArrayList<>();
@@ -91,6 +92,33 @@ public class MovieService {
         }
     }
 
+    /**
+     * Creates a Movie object based on the provided JsonObject representing a movie.
+     *
+     * @param movieJson The JsonObject containing the movie information
+     * @return A Movie object with attributes set based on the values in the JsonObject
+     */
+    private Movie createMovie(JsonObject movieJson) {
+        Movie movie = new Movie();
+
+        movie.setId(movieJson.get("id").getAsInt());
+        movie.setTitle(getAsString(movieJson, "title"));
+        movie.setOverview(getAsString(movieJson, "overview"));
+        movie.setRelease_date(getAsString(movieJson, "release_date"));
+        movie.setPoster_path(getAsString(movieJson, "poster_path"));
+        movie.setOriginal_language(getAsString(movieJson, "original_language"));
+        movie.setPopularity(getAsDouble(movieJson, "popularity"));
+        movie.setVote_average(getAsDouble(movieJson, "vote_average"));
+        movie.setVote_count(getAsInt(movieJson, "vote_count"));
+        return movie;
+    }
+
+    /**
+     * Retrieves the reviews for a specific movie identified by the given movieId.
+     *
+     * @param movieId The unique identifier of the movie for which to retrieve reviews
+     * @return A list of Review objects containing information about each review, including author, content, rating, and last update date
+     */
     public List<Review> getMovieReviews(int movieId) {
         List<Review> reviews = new ArrayList<>();
         try {
@@ -119,16 +147,42 @@ public class MovieService {
         return reviews;
     }
 
+
+    /**
+     * Retrieves the value associated with the specified member name from the given JsonObject as a string.
+     * If the member does not exist or is null, returns an empty string.
+     *
+     * @param obj The JsonObject from which to retrieve the value
+     * @param memberName The name of the member whose value is to be retrieved
+     * @return The string value associated with the member name, or an empty string if the member is null or does not exist
+     */
     private String getAsString(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsString() : "";
     }
 
+
+    /**
+     * Retrieves the value associated with the specified member name from the given JsonObject as an integer.
+     * If the member does not exist or is null, returns 0.
+     *
+     * @param obj The JsonObject from which to retrieve the value
+     * @param memberName The name of the member whose value is to be retrieved
+     * @return The integer value associated with the member name, or 0 if the member is null or does not exist
+     */
     private int getAsInt(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsInt() : 0;
     }
 
+    /**
+     * Retrieves the value associated with the specified member name from the given JsonObject as a double.
+     * If the member does not exist or is null, returns 0.0.
+     *
+     * @param obj The JsonObject from which to retrieve the value
+     * @param memberName The name of the member whose value is to be retrieved
+     * @return The double value associated with the member name, or 0.0 if the member is null or does not exist
+     */
     private double getAsDouble(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsDouble() : 0.0;

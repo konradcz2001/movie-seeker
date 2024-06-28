@@ -18,10 +18,29 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+
+/**
+ * Represents a servlet that handles HTTP GET requests to search for movies based on the provided query, genre, sorting criteria, and sort order.
+ * The servlet retrieves movie data from an external API, processes the results, filters by genre if specified, sorts the movies based on the sorting criteria,
+ * and forwards the results to the index.jsp page for display.
+ *
+ * This servlet extends HttpServlet and is mapped to the "/search" URL pattern.
+ */
 @WebServlet("/search")
 public class MovieSearchServlet extends HttpServlet {
     private static final String API_KEY = ApiKey.apiKey;
 
+
+    /**
+     * Handles the HTTP GET request to search for movies based on the provided query, genre, sorting criteria, and sort order.
+     * Retrieves movie data from an external API, processes the results, filters by genre if specified,
+     * sorts the movies based on the sorting criteria, and forwards the results to the index.jsp page for display.
+     *
+     * @param req the HttpServletRequest object containing the request parameters
+     * @param resp the HttpServletResponse object for sending the response
+     * @throws ServletException if the servlet encounters difficulty
+     * @throws IOException if an input or output error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String query = req.getParameter("query");
@@ -105,10 +124,22 @@ public class MovieSearchServlet extends HttpServlet {
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
+
+    /**
+     * Returns the string value of a JsonElement if it is not null and not a JsonNull element.
+     *
+     * @param element the JsonElement to retrieve the string value from
+     * @return the string value of the JsonElement, or an empty string if the element is null or a JsonNull element
+     */
     private String getJsonElementAsString(JsonElement element) {
         return element != null && !element.isJsonNull() ? element.getAsString() : "";
     }
 
+    /**
+     * Returns a mapping of genre IDs to their corresponding genre names.
+     *
+     * @return A HashMap containing mappings of genre IDs (Integer) to genre names (String).
+     */
     private Map<Integer, String> getGenreMap() {
         Map<Integer, String> genreMap = new HashMap<>();
         genreMap.put(28, "Action");

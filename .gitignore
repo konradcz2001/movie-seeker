@@ -37,4 +37,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-ApiKey.java
+ApiKey.java.codiumai

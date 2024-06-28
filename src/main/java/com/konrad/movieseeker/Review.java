@@ -1,12 +1,17 @@
 package com.konrad.movieseeker;
 
+
+/**
+ * The Review class represents a review for a movie.
+ * It contains information about the author of the review, the content of the review,
+ * the rating given to the movie, and the date when the review was last updated.
+ */
 public class Review {
     private String author;
     private String content;
     private double rating;
     private String updatedAt;
 
-    // Getters and setters
     public String getAuthor() {
         return author;
     }

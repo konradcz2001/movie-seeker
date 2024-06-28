@@ -16,10 +16,23 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+
 @WebServlet("/suggestions")
 public class MovieSuggestionsServlet extends HttpServlet {
     private static final String API_KEY = ApiKey.apiKey;
 
+
+    /**
+     * Receives a HTTP GET request with a query parameter, encodes the query using UTF-8 charset,
+     * constructs an API URL with the encoded query and API key, makes a GET request to the API URL,
+     * reads the response as a JSON object, extracts the 'results' array from the response,
+     * sets the response content type to 'application/json', and writes the 'results' array as a string to the response.
+     *
+     * @param req the HttpServletRequest object representing the request
+     * @param resp the HttpServletResponse object representing the response
+     * @throws ServletException if the servlet encounters difficulty
+     * @throws IOException if an input or output error occurs while the servlet is handling the GET request
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String query = req.getParameter("query");

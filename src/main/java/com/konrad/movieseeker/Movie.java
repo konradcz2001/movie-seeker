@@ -2,6 +2,11 @@ package com.konrad.movieseeker;
 
 import java.util.List;
 
+/**
+ * The Movie class represents a movie entity with various attributes such as id, poster path, title, overview, release date,
+ * original language, popularity, vote average, vote count, genres, and reviews.
+ * It also includes a nested static class Genre to represent the genre of the movie.
+ */
 public class Movie {
     private int id;
     private String poster_path;
@@ -15,7 +20,6 @@ public class Movie {
     private List<Genre> genres;
     private List<Review> reviews;
 
-    // Getters and setters
 
     public int getId() {
         return id;
@@ -108,8 +112,6 @@ public class Movie {
     public static class Genre {
         private int id;
         private String name;
-
-        // Getters and setters
 
         public int getId() {
             return id;
