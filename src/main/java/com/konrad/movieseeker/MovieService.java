@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * The MovieService class provides methods to interact with the Movie Database API.
- * It allows searching for movies based on a query string, retrieving details of a specific movie including trailers,
+ * It allows searching for movies based on a query string, retrieving details of a specific movie,
  * fetching movie reviews, and creating Movie objects from JSON data.
  * The class handles HTTP connections to the API endpoints and parses JSON responses to populate Movie and Review objects.
  */
@@ -55,16 +55,16 @@ public class MovieService {
 
     /**
      * Retrieves details of a movie based on the provided movieId.
-     * This method fetches information about the movie, including its genres, YouTube trailer key, and reviews.
+     * This method fetches information about the movie, including its genres, YouTube trailer key, cast members, and reviews.
      *
      * @param movieId The unique identifier of the movie for which to retrieve details
-     * @return A Movie object representing the details of the movie, including genres, trailer key, and reviews
+     * @return A Movie object representing the details of the movie, including genres and reviews
      * or null if an error occurs during the retrieval process
      */
     public Movie getMovieDetails(int movieId) {
         try {
-            // Using append_to_response to get videos in the same request
-            URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos");
+            // Using append_to_response to get videos and credits in the same request
+            URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -72,7 +72,6 @@ public class MovieService {
             JsonObject movieJson = JsonParser.parseReader(reader).getAsJsonObject();
             Movie movie = createMovie(movieJson);
 
-            // Parse Genres
             JsonArray genresArray = movieJson.getAsJsonArray("genres");
             List<Movie.Genre> genres = new ArrayList<>();
             for (JsonElement genreElement : genresArray) {
@@ -95,12 +94,29 @@ public class MovieService {
 
                     if ("YouTube".equals(site) && "Trailer".equals(type)) {
                         movie.setYoutubeKey(getAsString(video, "key"));
-                        break; // Stop after finding the first trailer
+                        break;
                     }
                 }
             }
 
-            // Fetch Reviews (kept separate as per original logic structure, though could be appended too)
+            // Parse Cast (Credits)
+            if (movieJson.has("credits") && !movieJson.get("credits").isJsonNull()) {
+                JsonObject creditsObj = movieJson.getAsJsonObject("credits");
+                JsonArray castArray = creditsObj.getAsJsonArray("cast");
+                List<Actor> castList = new ArrayList<>();
+                // Limit to top 6 actors
+                int limit = Math.min(castArray.size(), 6);
+                for (int i = 0; i < limit; i++) {
+                    JsonObject castJson = castArray.get(i).getAsJsonObject();
+                    Actor actor = new Actor();
+                    actor.setName(getAsString(castJson, "name"));
+                    actor.setCharacter(getAsString(castJson, "character"));
+                    actor.setProfile_path(getAsString(castJson, "profile_path"));
+                    castList.add(actor);
+                }
+                movie.setCast(castList);
+            }
+
             List<Review> reviews = getMovieReviews(movieId);
             movie.setReviews(reviews);
 

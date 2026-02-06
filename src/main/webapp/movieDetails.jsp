@@ -51,6 +51,28 @@
         </div>
     </c:if>
 
+    <c:if test="${not empty movie.cast}">
+        <div class="cast-container">
+            <h2>Top Cast</h2>
+            <div class="cast-list">
+                <c:forEach var="actor" items="${movie.cast}">
+                    <div class="actor-card">
+                        <c:choose>
+                            <c:when test="${not empty actor.profile_path}">
+                                <img src="https://image.tmdb.org/t/p/w200${actor.profile_path}" alt="${actor.name}">
+                            </c:when>
+                            <c:otherwise>
+                                <div class="no-photo">No Image</div>
+                            </c:otherwise>
+                        </c:choose>
+                        <p><strong>${actor.name}</strong></p>
+                        <p class="character">${actor.character}</p>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
+
     <div class="reviews-container">
         <h2>Reviews</h2>
         <c:if test="${empty movie.reviews}">
