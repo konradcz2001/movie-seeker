@@ -39,6 +39,18 @@
             <p><strong>Vote Count:</strong> ${movie.vote_count}</p>
         </div>
     </div>
+
+    <c:if test="${not empty movie.youtubeKey}">
+        <div style="text-align: center; margin: 20px 0;">
+            <iframe width="100%" height="450" style="max-width: 800px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"
+                    src="https://www.youtube.com/embed/${movie.youtubeKey}"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </c:if>
+
     <div class="reviews-container">
         <h2>Reviews</h2>
         <c:if test="${empty movie.reviews}">
