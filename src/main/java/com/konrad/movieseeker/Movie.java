@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * The Movie class represents a movie entity with various attributes such as id, poster path, title, overview, release date,
- * original language, popularity, vote average, vote count, genres, and reviews.
+ * original language, popularity, vote average, vote count, genres, reviews, and a YouTube trailer key.
  * It also includes a nested static class Genre to represent the genre of the movie.
  */
 public class Movie {
@@ -17,6 +17,7 @@ public class Movie {
     private double popularity;
     private double vote_average;
     private int vote_count;
+    private String youtubeKey;
     private List<Genre> genres;
     private List<Review> reviews;
 
@@ -91,6 +92,14 @@ public class Movie {
 
     public void setVote_count(int vote_count) {
         this.vote_count = vote_count;
+    }
+
+    public String getYoutubeKey() {
+        return youtubeKey;
+    }
+
+    public void setYoutubeKey(String youtubeKey) {
+        this.youtubeKey = youtubeKey;
     }
 
     public List<Genre> getGenres() {
