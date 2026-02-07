@@ -73,6 +73,27 @@
         </div>
     </c:if>
 
+    <c:if test="${not empty movie.recommendations}">
+        <div class="recommendations-container">
+            <h2>You Might Also Like</h2>
+            <div class="recommendations-list">
+                <c:forEach var="rec" items="${movie.recommendations}">
+                    <div class="recommendation-card" onclick="window.location.href='movieDetails?id=${rec.id}'">
+                        <c:choose>
+                            <c:when test="${not empty rec.poster_path}">
+                                <img src="https://image.tmdb.org/t/p/w200${rec.poster_path}" alt="${rec.title}">
+                            </c:when>
+                            <c:otherwise>
+                                <div class="no-photo">No Image</div>
+                            </c:otherwise>
+                        </c:choose>
+                        <p class="rec-title">${rec.title}</p>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
+
     <div class="reviews-container">
         <h2>Reviews</h2>
         <c:if test="${empty movie.reviews}">

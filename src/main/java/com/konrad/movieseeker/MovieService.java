@@ -55,16 +55,17 @@ public class MovieService {
 
     /**
      * Retrieves details of a movie based on the provided movieId.
-     * This method fetches information about the movie, including its genres, YouTube trailer key, cast members, and reviews.
+     * This method fetches information about the movie, including genres, YouTube trailer key,
+     * cast members, similar movie recommendations, and reviews.
      *
      * @param movieId The unique identifier of the movie for which to retrieve details
-     * @return A Movie object representing the details of the movie, including genres and reviews
+     * @return A Movie object representing the details of the movie
      * or null if an error occurs during the retrieval process
      */
     public Movie getMovieDetails(int movieId) {
         try {
-            // Using append_to_response to get videos and credits in the same request
-            URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits");
+            // Using append_to_response to get videos, credits, and recommendations in the same request
+            URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits,recommendations");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -104,7 +105,6 @@ public class MovieService {
                 JsonObject creditsObj = movieJson.getAsJsonObject("credits");
                 JsonArray castArray = creditsObj.getAsJsonArray("cast");
                 List<Actor> castList = new ArrayList<>();
-                // Limit to top 6 actors
                 int limit = Math.min(castArray.size(), 6);
                 for (int i = 0; i < limit; i++) {
                     JsonObject castJson = castArray.get(i).getAsJsonObject();
@@ -115,6 +115,23 @@ public class MovieService {
                     castList.add(actor);
                 }
                 movie.setCast(castList);
+            }
+
+            // Parse Recommendations
+            if (movieJson.has("recommendations") && !movieJson.get("recommendations").isJsonNull()) {
+                JsonObject recsObj = movieJson.getAsJsonObject("recommendations");
+                JsonArray results = recsObj.getAsJsonArray("results");
+                List<Movie> recList = new ArrayList<>();
+                int limit = Math.min(results.size(), 6); // Limit to 6 recommendations
+                for (int i = 0; i < limit; i++) {
+                    JsonObject recJson = results.get(i).getAsJsonObject();
+                    Movie rec = new Movie();
+                    rec.setId(recJson.get("id").getAsInt());
+                    rec.setTitle(getAsString(recJson, "title"));
+                    rec.setPoster_path(getAsString(recJson, "poster_path"));
+                    recList.add(rec);
+                }
+                movie.setRecommendations(recList);
             }
 
             List<Review> reviews = getMovieReviews(movieId);
