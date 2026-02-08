@@ -459,6 +459,11 @@ select {
 }
 
 /* --- Watchlist Vertical List --- */
+.watchlist-page h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
 .movies-list-vertical {
     display: flex;
     flex-direction: column;
@@ -579,4 +584,20 @@ select {
     .video-container iframe {
         height: 300px;
     }
+}
+
+/* Style for missing overview text */
+.no-overview {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: 2rem;
+}
+
+/* Style for empty watchlist message */
+.alert-box {
+    text-align: center;
+    margin-top: 3rem;
+    color: var(--text-muted);
+    font-size: 1.2rem;
 }

@@ -71,7 +71,7 @@
                                 <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" loading="lazy">
                             </c:when>
                             <c:otherwise>
-                                <div class="no-poster">No Image</div>
+                                <img src="${pageContext.request.contextPath}/images/no-poster.png" alt="No Image" loading="lazy">
                             </c:otherwise>
                         </c:choose>
                     </div>

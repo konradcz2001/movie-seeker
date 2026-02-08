@@ -37,7 +37,7 @@
                     <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
                 </c:when>
                 <c:otherwise>
-                    <div class="no-poster">No Image</div>
+                    <img src="${pageContext.request.contextPath}/images/no-poster.png" alt="No Image">
                 </c:otherwise>
             </c:choose>
         </div>
@@ -64,7 +64,14 @@
 
             <div class="overview">
                 <h3>Overview</h3>
-                <p>${movie.overview}</p>
+                <c:choose>
+                    <c:when test="${not empty movie.overview}">
+                        <p>${movie.overview}</p>
+                    </c:when>
+                    <c:otherwise>
+                        <p class="no-overview">No overview available for this movie.</p>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </section>
@@ -93,7 +100,7 @@
                                 <img src="https://image.tmdb.org/t/p/w200${actor.profile_path}" alt="${actor.name}" loading="lazy">
                             </c:when>
                             <c:otherwise>
-                                <div class="no-photo">No Image</div>
+                                <img src="${pageContext.request.contextPath}/images/no-profile.png" alt="No Image" loading="lazy">
                             </c:otherwise>
                         </c:choose>
                         <div class="card-body">
@@ -117,7 +124,7 @@
                                 <img src="https://image.tmdb.org/t/p/w200${rec.poster_path}" alt="${rec.title}" loading="lazy">
                             </c:when>
                             <c:otherwise>
-                                <div class="no-photo">No Image</div>
+                                <img src="${pageContext.request.contextPath}/images/no-poster.png" alt="No Image" loading="lazy">
                             </c:otherwise>
                         </c:choose>
                         <div class="card-body">

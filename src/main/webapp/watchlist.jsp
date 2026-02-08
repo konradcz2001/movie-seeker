@@ -44,9 +44,14 @@
             <c:forEach var="movie" items="${movies}">
                 <article class="movie-row" onclick="window.location.href='movieDetails?id=${movie.id}'">
                     <div class="poster-thumb">
-                        <c:if test="${not empty movie.poster_path}">
-                            <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
-                        </c:if>
+                        <c:choose>
+                            <c:when test="${not empty movie.poster_path}">
+                                <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/images/no-poster.png" alt="No Image">
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                     <div class="info-col">
                         <h2>${movie.title}</h2>
