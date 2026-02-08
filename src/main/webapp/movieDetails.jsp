@@ -23,7 +23,7 @@
             <a href="${pageContext.request.contextPath}/watchlist.jsp" class="nav-link">My Watchlist</a>
             <div class="theme-toggle">
                 <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-                <label for="theme-toggle" class="theme-label" title="Toggle Dark Mode">🌙</label>
+                <label for="theme-toggle" class="theme-label" title="Toggle Dark Mode"></label>
             </div>
         </nav>
     </div>

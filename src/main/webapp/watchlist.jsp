@@ -21,7 +21,7 @@
             <a href="${pageContext.request.contextPath}/" class="nav-link">Back to Search</a>
             <div class="theme-toggle">
                 <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-                <label for="theme-toggle" class="theme-label" title="Toggle Dark Mode">🌙</label>
+                <label for="theme-toggle" class="theme-label" title="Toggle Dark Mode"></label>
             </div>
         </nav>
     </div>
