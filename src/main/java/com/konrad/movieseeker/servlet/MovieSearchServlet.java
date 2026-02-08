@@ -1,5 +1,8 @@
-package com.konrad.movieseeker;
+package com.konrad.movieseeker.servlet;
 
+import com.konrad.movieseeker.model.Movie;
+import com.konrad.movieseeker.model.SearchResult;
+import com.konrad.movieseeker.service.MovieService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

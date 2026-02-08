@@ -1,4 +1,4 @@
-package com.konrad.movieseeker;
+package com.konrad.movieseeker.model;
 
 /**
  * Represents an actor in a movie.

@@ -37,4 +37,5 @@ build/
 ### Mac OS ###
 .DS_Store
 
-ApiKey.java
+# Security
+src/main/resources/secrets.properties
