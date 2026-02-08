@@ -1,8 +1,9 @@
-package com.konrad.movieseeker;
+package com.konrad.movieseeker.servlet;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.konrad.movieseeker.util.AppConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 
 @WebServlet("/suggestions")
 public class MovieSuggestionsServlet extends HttpServlet {
-    private static final String API_KEY = ApiKey.apiKey;
 
+    private static final String API_KEY = AppConfig.getApiKey();
 
     /**
      * Receives a HTTP GET request with a query parameter, encodes the query using UTF-8 charset,
@@ -48,7 +49,8 @@ public class MovieSuggestionsServlet extends HttpServlet {
             throw new IOException("Server returned HTTP response code: " + conn.getResponseCode() + " for URL: " + apiUrl);
         }
 
-        InputStreamReader reader = new InputStreamReader(conn.getInputStream());
+        // Enforced UTF-8 encoding
+        InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
         JsonObject response = JsonParser.parseReader(reader).getAsJsonObject();
         JsonArray results = response.getAsJsonArray("results");
 

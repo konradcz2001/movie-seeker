@@ -1,13 +1,19 @@
-package com.konrad.movieseeker;
+package com.konrad.movieseeker.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.konrad.movieseeker.model.Actor;
+import com.konrad.movieseeker.model.Movie;
+import com.konrad.movieseeker.model.Review;
+import com.konrad.movieseeker.model.SearchResult;
+import com.konrad.movieseeker.util.AppConfig;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +23,8 @@ import java.util.List;
  * and parsing the JSON responses into domain objects.
  */
 public class MovieService {
-    private static final String API_KEY = ApiKey.apiKey;
+
+    private static final String API_KEY = AppConfig.getApiKey();
     private static final String SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=" + API_KEY + "&query=";
     private static final String DISCOVER_URL = "https://api.themoviedb.org/3/discover/movie?api_key=" + API_KEY;
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
@@ -90,7 +97,8 @@ public class MovieService {
                 return new SearchResult(new ArrayList<>(), 0, 1);
             }
 
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream());
+            // Enforced UTF-8 encoding
+            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
             JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
             JsonArray results = jsonResponse.getAsJsonArray("results");
 
@@ -142,7 +150,8 @@ public class MovieService {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream());
+            // Enforced UTF-8 encoding
+            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
             JsonObject movieJson = JsonParser.parseReader(reader).getAsJsonObject();
             Movie movie = createMovie(movieJson);
 
@@ -252,7 +261,8 @@ public class MovieService {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream());
+            // Enforced UTF-8 encoding
+            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
             JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
             JsonArray results = jsonResponse.getAsJsonArray("results");
 

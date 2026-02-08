@@ -1,4 +1,4 @@
-package com.konrad.movieseeker;
+package com.konrad.movieseeker.model;
 
 import java.util.List;
 

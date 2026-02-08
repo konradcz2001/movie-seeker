@@ -1,5 +1,4 @@
-package com.konrad.movieseeker;
-
+package com.konrad.movieseeker.model;
 
 /**
  * The Review class represents a review for a movie.
