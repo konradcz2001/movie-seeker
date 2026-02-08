@@ -8,12 +8,16 @@
     <title>Movie Details</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <script src="js/theme.js" defer></script>
+    <script src="js/watchlist.js" defer></script>
 </head>
 <body>
 <div class="container">
     <div class="header-container">
         <h1>Movie Details</h1>
-        <button onclick="window.location.href='index.jsp'">Back to Search</button>
+        <div class="header-controls">
+            <button onclick="window.location.href='${pageContext.request.contextPath}/'">Back to Search</button>
+            <a href="watchlist.jsp" class="watchlist-btn">My Watchlist</a>
+        </div>
         <div class="theme-toggle">
             <label for="theme">Dark Theme:</label>
             <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
@@ -25,6 +29,7 @@
         </c:if>
         <div class="movie-info">
             <h2>${movie.title}</h2>
+            <button id="watchlist-toggle" onclick="toggleWatchlist(${movie.id}, this)">Add to Watchlist</button>
             <p><strong>Overview:</strong> ${movie.overview}</p>
             <p><strong>Genres:</strong>
                 <c:forEach var="genre" items="${movie.genres}" varStatus="status">
@@ -112,5 +117,13 @@
         </c:forEach>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('watchlist-toggle');
+        if(btn) {
+            updateButtonState(${movie.id}, btn);
+        }
+    });
+</script>
 </body>
 </html>

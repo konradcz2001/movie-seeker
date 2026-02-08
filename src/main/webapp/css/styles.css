@@ -380,16 +380,19 @@ body.dark-mode .page-info {
     }
 }
 
-button {
+button, .watchlist-btn {
     padding: 10px 20px;
     border: none;
     background-color: #5cb85c;
     color: white;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
 }
 
-button:hover {
+button:hover, .watchlist-btn:hover {
     background-color: #4cae4c;
 }
 
@@ -486,8 +489,12 @@ body.dark-mode .review p strong {
     margin-bottom: 10px;
 }
 
-.header-container button {
-    display: inline-block;
+.header-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
 .theme-toggle {
@@ -499,4 +506,21 @@ body.dark-mode .review p strong {
 
 .theme-toggle label {
     margin-right: 10px;
+}
+
+/* Watchlist Buttons */
+.add-btn {
+    background-color: #007bff;
+}
+
+.add-btn:hover {
+    background-color: #0069d9;
+}
+
+.remove-btn {
+    background-color: #dc3545;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
 }
