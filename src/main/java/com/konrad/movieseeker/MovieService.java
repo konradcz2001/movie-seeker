@@ -13,30 +13,76 @@ import java.util.List;
 
 /**
  * The MovieService class provides methods to interact with the Movie Database API (TMDb).
- * It encapsulates the logic for fetching movie data, searching, retrieving details, reviews,
+ * It encapsulates the logic for fetching movie data, searching, discovering, retrieving details, reviews,
  * and parsing the JSON responses into domain objects.
  */
 public class MovieService {
     private static final String API_KEY = ApiKey.apiKey;
     private static final String SEARCH_URL = "https://api.themoviedb.org/3/search/movie?api_key=" + API_KEY + "&query=";
+    private static final String DISCOVER_URL = "https://api.themoviedb.org/3/discover/movie?api_key=" + API_KEY;
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIE_REVIEWS_URL = "https://api.themoviedb.org/3/movie/";
 
     /**
      * Searches for movies based on the provided query string and page number.
-     * This method handles pagination by accepting a page parameter and returning a SearchResult object
-     * containing both the list of movies and the total page count.
+     * This method uses the /search/movie endpoint which sorts by relevance.
      *
-     * @param query The search query string to look for movies.
-     * @param page  The page number of results to retrieve (starts at 1).
-     * @return A {@link SearchResult} object containing the list of found movies and pagination info.
-     * Returns an empty result with page 1 if the request fails.
+     * @param query The search query string.
+     * @param page  The page number.
+     * @return A {@link SearchResult} object.
      */
     public SearchResult searchMovies(String query, int page) {
+        String urlString = SEARCH_URL + query.replace(" ", "%20") + "&page=" + page;
+        return fetchMoviesFromUrl(urlString, page);
+    }
+
+    /**
+     * Discovers movies based on filters and sort options using the Discover API.
+     * This guarantees consistent sorting across pages.
+     *
+     * @param genreId   The genre ID to filter by.
+     * @param sortBy    The field to sort by.
+     * @param sortOrder The sort order ("asc" or "desc").
+     * @param page      The page number.
+     * @return A {@link SearchResult} object.
+     */
+    public SearchResult discoverMovies(String genreId, String sortBy, String sortOrder, int page) {
+        StringBuilder urlBuilder = new StringBuilder(DISCOVER_URL);
+        urlBuilder.append("&page=").append(page);
+
+        // Apply Genre Filter
+        if (genreId != null && !genreId.isEmpty()) {
+            urlBuilder.append("&with_genres=").append(genreId);
+        }
+
+        // Apply Sorting
+        // Default to popularity if no sortBy is provided
+        String apiSortBy = "popularity";
+        if (sortBy != null && !sortBy.isEmpty()) {
+            apiSortBy = mapSortParam(sortBy);
+        }
+
+        // Ensure sortOrder is respected even for default popularity
+        String order = (sortOrder != null && !sortOrder.isEmpty()) ? sortOrder : "desc";
+        urlBuilder.append("&sort_by=").append(apiSortBy).append(".").append(order);
+
+        return fetchMoviesFromUrl(urlBuilder.toString(), page);
+    }
+
+    private String mapSortParam(String sortBy) {
+        switch (sortBy) {
+            case "release_date": return "primary_release_date";
+            case "vote_average": return "vote_average";
+            case "vote_count": return "vote_count";
+            default: return "popularity";
+        }
+    }
+
+    private SearchResult fetchMoviesFromUrl(String urlString, int page) {
         List<Movie> movies = new ArrayList<>();
         int totalPages = 0;
         try {
-            URL url = new URL(SEARCH_URL + query.replace(" ", "%20") + "&page=" + page);
+            URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

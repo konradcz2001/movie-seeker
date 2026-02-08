@@ -12,33 +12,31 @@ import java.util.*;
 /**
  * Servlet implementation class MovieSearchServlet.
  * <p>
- * This servlet handles the search functionality for movies. It processes GET requests
- * containing search queries, pagination parameters, and filter options (genre, sort order).
- * It delegates the actual data fetching to {@link MovieService} and forwards the results
- * to the {@code index.jsp} view.
+ * This servlet acts as the main controller for the application.
+ * It maps to both the root context ("") and "/search", ensuring that initialization logic
+ * (like loading genres) runs immediately upon application start.
  * </p>
  */
-@WebServlet("/search")
+@WebServlet(urlPatterns = {"", "/search"})
 public class MovieSearchServlet extends HttpServlet {
     private final MovieService movieService = new MovieService();
 
-    /**
-     * Handles the HTTP GET method.
-     * Retrieves search parameters, fetches paginated movie results, applies in-memory filtering/sorting
-     * (for the current page), and sets attributes for the view.
-     *
-     * @param req  an {@link HttpServletRequest} object that contains the request the client has made of the servlet
-     * @param resp an {@link HttpServletResponse} object that contains the response the servlet sends to the client
-     * @throws ServletException if the request for the GET could not be handled
-     * @throws IOException      if an input or output error is detected when the servlet handles the GET request
-     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Retrieve parameters
         String query = req.getParameter("query");
         String genre = req.getParameter("genre");
         String sortBy = req.getParameter("sortBy");
-        String sortOrder = req.getParameter("sortOrder") != null ? "asc" : "desc";
+        String sortOrderParam = req.getParameter("sortOrder");
 
+        // 1. Resolve Sort Order (Strict check)
+        // Default is "desc" unless explicit "asc" or "on" (checkbox) is received.
+        String sortOrder = "desc";
+        if ("asc".equals(sortOrderParam) || "on".equals(sortOrderParam)) {
+            sortOrder = "asc";
+        }
+
+        // 2. Resolve Page
         int page = 1;
         if (req.getParameter("page") != null && !req.getParameter("page").isEmpty()) {
             try {
@@ -48,44 +46,44 @@ public class MovieSearchServlet extends HttpServlet {
             }
         }
 
-        // Use Service to fetch data with pagination
-        SearchResult searchResult = movieService.searchMovies(query, page);
-        List<Movie> movies = searchResult.getMovies();
+        SearchResult searchResult;
+        List<Movie> movies;
 
-        // In-memory filtering (Note: filtering happens on the current page of results returned by API)
-        if (genre != null && !genre.isEmpty()) {
-            int genreId = Integer.parseInt(genre);
-            movies.removeIf(movie -> movie.getGenre_ids() == null || !movie.getGenre_ids().contains(genreId));
+        // 3. DECISION LOGIC: Search Mode vs. Discover Mode
+        // If 'query' contains actual text, we MUST use Search API (which has pagination limitations regarding sorting).
+        // If 'query' is null or empty/whitespace, we use Discover API (which supports perfect global sorting).
+        boolean hasQuery = (query != null && !query.trim().isEmpty());
+
+        if (hasQuery) {
+            // MODE 1: Text Search (e.g., User typed "Batman")
+            // API Limitation: TMDb Search API sorts by "relevance" by default and doesn't support global custom sorting.
+            // We fetch the raw page and apply filtering/sorting in-memory ONLY FOR THE CURRENT PAGE.
+            searchResult = movieService.searchMovies(query, page);
+            movies = searchResult.getMovies();
+
+            // In-memory Filtering
+            if (genre != null && !genre.isEmpty()) {
+                int genreId = Integer.parseInt(genre);
+                movies.removeIf(movie -> movie.getGenre_ids() == null || !movie.getGenre_ids().contains(genreId));
+            }
+
+            // In-memory Sorting
+            if (sortBy != null && !sortBy.isEmpty()) {
+                sortMoviesInMemory(movies, sortBy, sortOrder);
+            }
+
+        } else {
+            // MODE 2: Discover / Browse (e.g., User selected "Comedy" + "Popularity")
+            // We use the Discover API. This delegates sorting/filtering to the TMDb server.
+            // This ensures that Page 2 is correctly sorted relative to Page 1.
+            searchResult = movieService.discoverMovies(genre, sortBy, sortOrder, page);
+            movies = searchResult.getMovies();
         }
 
-        // In-memory sorting
-        if (sortBy != null && !sortBy.isEmpty()) {
-            Comparator<Movie> comparator;
-            switch (sortBy) {
-                case "popularity":
-                    comparator = Comparator.comparingDouble(Movie::getPopularity);
-                    break;
-                case "release_date":
-                    comparator = Comparator.comparing(Movie::getRelease_date);
-                    break;
-                case "vote_average":
-                    comparator = Comparator.comparingDouble(Movie::getVote_average);
-                    break;
-                case "vote_count":
-                    comparator = Comparator.comparingInt(Movie::getVote_count);
-                    break;
-                default:
-                    comparator = Comparator.comparing(Movie::getTitle);
-            }
-            if (sortOrder.equals("desc")) {
-                comparator = comparator.reversed();
-            }
-            movies.sort(comparator);
-        }
-
+        // 4. Set Attributes for JSP
         req.setAttribute("movies", movies);
         req.setAttribute("genreMap", getGenreMap());
-        req.setAttribute("query", query);
+        req.setAttribute("query", query); // Pass back query so input field works
         req.setAttribute("selectedGenre", genre);
         req.setAttribute("selectedSortBy", sortBy);
         req.setAttribute("selectedSortOrder", sortOrder);
@@ -95,12 +93,30 @@ public class MovieSearchServlet extends HttpServlet {
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
-    /**
-     * Helper method to generate a map of genre IDs to genre names.
-     * This is used to populate the genre dropdown in the UI and map IDs in results.
-     *
-     * @return A map containing Genre ID as Key and Genre Name as Value.
-     */
+    private void sortMoviesInMemory(List<Movie> movies, String sortBy, String sortOrder) {
+        Comparator<Movie> comparator;
+        switch (sortBy) {
+            case "popularity":
+                comparator = Comparator.comparingDouble(Movie::getPopularity);
+                break;
+            case "release_date":
+                comparator = Comparator.comparing(Movie::getRelease_date, Comparator.nullsLast(String::compareTo));
+                break;
+            case "vote_average":
+                comparator = Comparator.comparingDouble(Movie::getVote_average);
+                break;
+            case "vote_count":
+                comparator = Comparator.comparingInt(Movie::getVote_count);
+                break;
+            default:
+                comparator = Comparator.comparing(Movie::getTitle);
+        }
+        if ("desc".equals(sortOrder)) {
+            comparator = comparator.reversed();
+        }
+        movies.sort(comparator);
+    }
+
     private Map<Integer, String> getGenreMap() {
         Map<Integer, String> genreMap = new HashMap<>();
         genreMap.put(28, "Action");
