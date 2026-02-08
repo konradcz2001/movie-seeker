@@ -12,20 +12,7 @@
 </head>
 <body>
 
-<header class="app-header">
-    <div class="container header-content">
-        <a href="${pageContext.request.contextPath}/" class="logo">
-            🎬 Movie<span>Seeker</span>
-        </a>
-        <nav class="main-nav">
-            <a href="${pageContext.request.contextPath}/" class="nav-link">Back to Search</a>
-            <div class="theme-toggle">
-                <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-                <label for="theme-toggle" class="theme-label" title="Toggle Dark Mode"></label>
-            </div>
-        </nav>
-    </div>
-</header>
+<%@ include file="fragments/header.jsp" %>
 
 <main class="container watchlist-page">
     <h1>My Watchlist</h1>
@@ -82,12 +69,7 @@
     </section>
 </main>
 
-<footer class="app-footer">
-    <div class="container">
-        <p>&copy; 2026 Movie Seeker by Konrad Czardybon</p>
-        <p class="api-credit">This product uses the TMDb API but is not endorsed or certified by TMDb.</p>
-    </div>
-</footer>
+<%@ include file="fragments/footer.jsp" %>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
