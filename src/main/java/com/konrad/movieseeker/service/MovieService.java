@@ -10,6 +10,8 @@ import com.konrad.movieseeker.model.Review;
 import com.konrad.movieseeker.model.SearchResult;
 import com.konrad.movieseeker.util.AppConfig;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * The MovieService class provides methods to interact with the Movie Database API (TMDb).
@@ -95,17 +98,12 @@ public class MovieService {
         List<Movie> movies = new ArrayList<>();
         int totalPages = 0;
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            if (conn.getResponseCode() != 200) {
+            String jsonResponseString = makeApiCall(urlString);
+            if (jsonResponseString == null) {
                 return new SearchResult(new ArrayList<>(), 0, 1);
             }
 
-            // Enforced UTF-8 encoding
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
-            JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject jsonResponse = JsonParser.parseString(jsonResponseString).getAsJsonObject();
             JsonArray results = jsonResponse.getAsJsonArray("results");
 
             if (jsonResponse.has("total_pages")) {
@@ -151,13 +149,12 @@ public class MovieService {
         try {
             System.out.println("Fetching movie details from API for ID: " + movieId);
             // Using append_to_response to get videos, credits, and recommendations in a single HTTP request
-            URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits,recommendations");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
+            String url = MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits,recommendations";
 
-            // Enforced UTF-8 encoding
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
-            JsonObject movieJson = JsonParser.parseReader(reader).getAsJsonObject();
+            String jsonResponseString = makeApiCall(url);
+            if (jsonResponseString == null) return null;
+
+            JsonObject movieJson = JsonParser.parseString(jsonResponseString).getAsJsonObject();
             Movie movie = createMovie(movieJson);
 
             // Parse Genres
@@ -242,6 +239,62 @@ public class MovieService {
     }
 
     /**
+     * Fetches reviews for a specific movie.
+     *
+     * @param movieId The ID of the movie.
+     * @return A list of {@link Review} objects.
+     */
+    public List<Review> getMovieReviews(int movieId) {
+        List<Review> reviews = new ArrayList<>();
+        try {
+            String url = MOVIE_REVIEWS_URL + movieId + "/reviews?api_key=" + API_KEY;
+            String jsonResponseString = makeApiCall(url);
+
+            if (jsonResponseString == null) return reviews;
+
+            JsonObject jsonResponse = JsonParser.parseString(jsonResponseString).getAsJsonObject();
+            JsonArray results = jsonResponse.getAsJsonArray("results");
+
+            for (int i = 0; i < results.size(); i++) {
+                JsonObject reviewJson = results.get(i).getAsJsonObject();
+                Review review = new Review();
+                review.setAuthor(getAsString(reviewJson, "author"));
+                review.setContent(getAsString(reviewJson, "content"));
+                review.setRating(getAsDouble(reviewJson.get("author_details").getAsJsonObject(), "rating"));
+                review.setUpdatedAt(getAsString(reviewJson, "updated_at"));
+                reviews.add(review);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return reviews;
+    }
+
+    /**
+     * Protected method to perform the actual network call.
+     * This method is protected so it can be overridden (mocked) in unit tests
+     * to avoid making real HTTP requests.
+     *
+     * @param urlString The full URL to fetch.
+     * @return The response body as a String, or null if request fails.
+     * @throws IOException If network error occurs.
+     */
+    protected String makeApiCall(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        if (conn.getResponseCode() != 200) {
+            return null;
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
+
+    /**
      * Helper method to create a basic Movie object from a JSON object.
      * Maps common fields like ID, title, overview, release date, etc.
      *
@@ -262,70 +315,16 @@ public class MovieService {
         return movie;
     }
 
-    /**
-     * Fetches reviews for a specific movie.
-     *
-     * @param movieId The ID of the movie.
-     * @return A list of {@link Review} objects.
-     */
-    public List<Review> getMovieReviews(int movieId) {
-        List<Review> reviews = new ArrayList<>();
-        try {
-            URL url = new URL(MOVIE_REVIEWS_URL + movieId + "/reviews?api_key=" + API_KEY);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            // Enforced UTF-8 encoding
-            InputStreamReader reader = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
-            JsonObject jsonResponse = JsonParser.parseReader(reader).getAsJsonObject();
-            JsonArray results = jsonResponse.getAsJsonArray("results");
-
-            for (int i = 0; i < results.size(); i++) {
-                JsonObject reviewJson = results.get(i).getAsJsonObject();
-                Review review = new Review();
-                review.setAuthor(getAsString(reviewJson, "author"));
-                review.setContent(getAsString(reviewJson, "content"));
-                review.setRating(getAsDouble(reviewJson.get("author_details").getAsJsonObject(), "rating"));
-                review.setUpdatedAt(getAsString(reviewJson, "updated_at"));
-                reviews.add(review);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return reviews;
-    }
-
-    /**
-     * Safely retrieves a string member from a JsonObject.
-     *
-     * @param obj        The parent JsonObject.
-     * @param memberName The key to look up.
-     * @return The string value or an empty string if null/missing.
-     */
     private String getAsString(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsString() : "";
     }
 
-    /**
-     * Safely retrieves an int member from a JsonObject.
-     *
-     * @param obj        The parent JsonObject.
-     * @param memberName The key to look up.
-     * @return The int value or 0 if null/missing.
-     */
     private int getAsInt(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsInt() : 0;
     }
 
-    /**
-     * Safely retrieves a double member from a JsonObject.
-     *
-     * @param obj        The parent JsonObject.
-     * @param memberName The key to look up.
-     * @return The double value or 0.0 if null/missing.
-     */
     private double getAsDouble(JsonObject obj, String memberName) {
         JsonElement elem = obj.get(memberName);
         return elem != null && !elem.isJsonNull() ? elem.getAsDouble() : 0.0;

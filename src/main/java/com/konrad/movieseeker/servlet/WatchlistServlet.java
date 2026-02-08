@@ -20,7 +20,15 @@ import java.util.List;
 @WebServlet("/watchlist")
 public class WatchlistServlet extends HttpServlet {
 
-    private final MovieService movieService = new MovieService();
+    private MovieService movieService = new MovieService();
+
+    /**
+     * Setter method to inject a (mock) MovieService during unit testing.
+     * @param movieService the service to set.
+     */
+    public void setMovieService(MovieService movieService) {
+        this.movieService = movieService;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
