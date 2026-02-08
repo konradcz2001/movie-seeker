@@ -11,6 +11,9 @@
 </head>
 <body>
 <h1>Movie Seeker</h1>
+<div class="header-controls">
+    <a href="watchlist.jsp" class="watchlist-btn">My Watchlist</a>
+</div>
 <div class="theme-toggle">
     <label for="theme">Dark Theme:</label>
     <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
