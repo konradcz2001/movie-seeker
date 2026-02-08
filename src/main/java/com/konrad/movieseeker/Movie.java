@@ -6,7 +6,9 @@ import java.util.List;
  * The Movie class represents a movie entity with various attributes such as id, poster path, title, overview, release date,
  * original language, popularity, vote average, vote count, genres, reviews, YouTube trailer key, cast details,
  * and a list of recommended movies.
- * It also includes a nested static class Genre to represent the genre of the movie.
+ * <p>
+ * It serves as the main data model mapped from the TMDb API responses.
+ * </p>
  */
 public class Movie {
     private int id;
@@ -20,10 +22,16 @@ public class Movie {
     private int vote_count;
     private String youtubeKey;
     private List<Genre> genres;
+
+    /**
+     * A list of genre IDs associated with the movie.
+     * This field is primarily populated during search results where full Genre objects are not provided by the API.
+     */
+    private List<Integer> genre_ids;
+
     private List<Review> reviews;
     private List<Actor> cast;
     private List<Movie> recommendations;
-
 
     public int getId() {
         return id;
@@ -113,6 +121,14 @@ public class Movie {
         this.genres = genres;
     }
 
+    public List<Integer> getGenre_ids() {
+        return genre_ids;
+    }
+
+    public void setGenre_ids(List<Integer> genre_ids) {
+        this.genre_ids = genre_ids;
+    }
+
     public List<Review> getReviews() {
         return reviews;
     }
@@ -137,6 +153,9 @@ public class Movie {
         this.recommendations = recommendations;
     }
 
+    /**
+     * Nested static class representing a Genre with an ID and a name.
+     */
     public static class Genre {
         private int id;
         private String name;
