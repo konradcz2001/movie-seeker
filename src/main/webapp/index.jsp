@@ -51,10 +51,14 @@
                     <option value="vote_count" <c:if test="${selectedSortBy == 'vote_count'}">selected</c:if>>Vote Count</option>
                 </select>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" id="sort-order" name="sortOrder" <c:if test="${selectedSortOrder == 'asc'}">checked</c:if>>
-                    <label for="sort-order">Ascending</label>
-                </div>
+                <input type="hidden" id="sort-order" name="sortOrder" value="${not empty selectedSortOrder ? selectedSortOrder : 'desc'}">
+
+                <button type="button" id="sort-order-btn" class="sort-toggle" onclick="toggleSortOrder()" title="Toggle Sort Order">
+                    <c:choose>
+                        <c:when test="${selectedSortOrder == 'asc'}">⬆️</c:when>
+                        <c:otherwise>⬇️</c:otherwise>
+                    </c:choose>
+                </button>
             </div>
 
             <button type="submit" class="btn btn-primary">Search</button>
@@ -116,6 +120,21 @@
         <p class="api-credit">This product uses the TMDb API but is not endorsed or certified by TMDb.</p>
     </div>
 </footer>
+
+<script>
+    function toggleSortOrder() {
+        const input = document.getElementById('sort-order');
+        const btn = document.getElementById('sort-order-btn');
+
+        if (input.value === 'asc') {
+            input.value = 'desc';
+            btn.innerHTML = '⬇️';
+        } else {
+            input.value = 'asc';
+            btn.innerHTML = '⬆️';
+        }
+    }
+</script>
 
 </body>
 </html>

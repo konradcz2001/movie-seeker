@@ -175,12 +175,6 @@ select {
     color: var(--text-color);
 }
 
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
 /* --- Buttons --- */
 .btn {
     padding: 10px 20px;
@@ -229,6 +223,19 @@ select {
     background-color: #dc3545;
     color: white;
     border-color: #dc3545;
+}
+
+.sort-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0 10px;
+    transition: transform 0.2s;
+}
+
+.sort-toggle:hover {
+    transform: scale(1.2);
 }
 
 /* --- Movies Grid --- */
