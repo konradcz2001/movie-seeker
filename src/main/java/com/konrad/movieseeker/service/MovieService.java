@@ -34,6 +34,7 @@ public class MovieService {
 
     // Simple in-memory cache to store movie details
     private final Map<Integer, Movie> movieCache = new ConcurrentHashMap<>();
+    private static final int CACHE_LIMIT = 100;
 
     /**
      * Searches for movies based on the provided query string and page number.
@@ -224,8 +225,12 @@ public class MovieService {
             List<Review> reviews = getMovieReviews(movieId);
             movie.setReviews(reviews);
 
-            // Store in cache
+            // Store in cache with size limit check
             if (movie != null) {
+                if (movieCache.size() >= CACHE_LIMIT) {
+                    System.out.println("Cache limit reached. Clearing cache.");
+                    movieCache.clear();
+                }
                 movieCache.put(movieId, movie);
             }
 
