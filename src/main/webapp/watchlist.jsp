@@ -13,7 +13,7 @@
     <div class="header-container">
         <h1>My Watchlist</h1>
         <div class="header-controls">
-            <button onclick="window.location.href='index.jsp'">Back to Search</button>
+            <button onclick="window.location.href='${pageContext.request.contextPath}/'">Back to Search</button>
         </div>
         <div class="theme-toggle">
             <label for="theme">Dark Theme:</label>
@@ -41,8 +41,18 @@
                     <div class="movie-details">
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
+
+                        <p><strong>Genres:</strong>
+                            <c:forEach var="genre" items="${movie.genres}" varStatus="status">
+                                ${genre.name}<c:if test="${not status.last}">, </c:if>
+                            </c:forEach>
+                        </p>
+
                         <p><strong>Release Date:</strong> ${movie.release_date}</p>
+                        <p><strong>Original Language:</strong> ${movie.original_language}</p>
+                        <p><strong>Popularity:</strong> ${movie.popularity}</p>
                         <p><strong>Vote Average:</strong> ${movie.vote_average}</p>
+                        <p><strong>Vote Count:</strong> ${movie.vote_count}</p>
                     </div>
                 </div>
             </c:forEach>
@@ -58,6 +68,7 @@
             const watchlist = getWatchlist();
             if (watchlist.length > 0) {
                 const idsParam = watchlist.join(',');
+                // Redirect to servlet with IDs
                 window.location.href = 'watchlist?ids=' + idsParam;
             } else {
                 document.getElementById('loading-msg').innerHTML = "<p>Your watchlist is currently empty.</p>";

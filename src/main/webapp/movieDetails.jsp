@@ -15,7 +15,7 @@
     <div class="header-container">
         <h1>Movie Details</h1>
         <div class="header-controls">
-            <button onclick="window.location.href='index.jsp'">Back to Search</button>
+            <button onclick="window.location.href='${pageContext.request.contextPath}/'">Back to Search</button>
             <a href="watchlist.jsp" class="watchlist-btn">My Watchlist</a>
         </div>
         <div class="theme-toggle">

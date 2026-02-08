@@ -26,6 +26,17 @@ public class MovieSearchServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Redirect mechanism to enforce trailing slash for CSS loading
+        // If the request is for the context root without a trailing slash (e.g., "/MovieSeeker"),
+        // redirect to "/MovieSeeker/".
+        String requestURI = req.getRequestURI();
+        String contextPath = req.getContextPath();
+
+        if (requestURI.equals(contextPath)) {
+            resp.sendRedirect(requestURI + "/");
+            return;
+        }
+
         // Retrieve parameters
         String query = req.getParameter("query");
         String genre = req.getParameter("genre");
