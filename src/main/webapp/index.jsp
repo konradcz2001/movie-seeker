@@ -61,5 +61,20 @@
         </c:forEach>
     </c:if>
 </div>
+
+<c:if test="${totalPages > 1}">
+    <div class="pagination-container">
+        <c:if test="${currentPage > 1}">
+            <a href="search?query=${query}&genre=${selectedGenre}&sortBy=${selectedSortBy}&sortOrder=${selectedSortOrder}&page=${currentPage - 1}" class="pagination-btn">Previous</a>
+        </c:if>
+
+        <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+
+        <c:if test="${currentPage < totalPages}">
+            <a href="search?query=${query}&genre=${selectedGenre}&sortBy=${selectedSortBy}&sortOrder=${selectedSortOrder}&page=${currentPage + 1}" class="pagination-btn">Next</a>
+        </c:if>
+    </div>
+</c:if>
+
 </body>
 </html>

@@ -1,9 +1,5 @@
 package com.konrad.movieseeker;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,35 +7,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-
 /**
- * Represents a servlet that handles HTTP GET requests to search for movies based on the provided query, genre, sorting criteria, and sort order.
- * The servlet retrieves movie data from an external API, processes the results, filters by genre if specified, sorts the movies based on the sorting criteria,
- * and forwards the results to the index.jsp page for display.
- *
- * This servlet extends HttpServlet and is mapped to the "/search" URL pattern.
+ * Servlet implementation class MovieSearchServlet.
+ * <p>
+ * This servlet handles the search functionality for movies. It processes GET requests
+ * containing search queries, pagination parameters, and filter options (genre, sort order).
+ * It delegates the actual data fetching to {@link MovieService} and forwards the results
+ * to the {@code index.jsp} view.
+ * </p>
  */
 @WebServlet("/search")
 public class MovieSearchServlet extends HttpServlet {
-    private static final String API_KEY = ApiKey.apiKey;
-
+    private final MovieService movieService = new MovieService();
 
     /**
-     * Handles the HTTP GET request to search for movies based on the provided query, genre, sorting criteria, and sort order.
-     * Retrieves movie data from an external API, processes the results, filters by genre if specified,
-     * sorts the movies based on the sorting criteria, and forwards the results to the index.jsp page for display.
+     * Handles the HTTP GET method.
+     * Retrieves search parameters, fetches paginated movie results, applies in-memory filtering/sorting
+     * (for the current page), and sets attributes for the view.
      *
-     * @param req the HttpServletRequest object containing the request parameters
-     * @param resp the HttpServletResponse object for sending the response
-     * @throws ServletException if the servlet encounters difficulty
-     * @throws IOException if an input or output error occurs
+     * @param req  an {@link HttpServletRequest} object that contains the request the client has made of the servlet
+     * @param resp an {@link HttpServletResponse} object that contains the response the servlet sends to the client
+     * @throws ServletException if the request for the GET could not be handled
+     * @throws IOException      if an input or output error is detected when the servlet handles the GET request
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -48,65 +39,43 @@ public class MovieSearchServlet extends HttpServlet {
         String sortBy = req.getParameter("sortBy");
         String sortOrder = req.getParameter("sortOrder") != null ? "asc" : "desc";
 
-        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
-        String apiUrl = "https://api.themoviedb.org/3/search/movie?api_key=" + API_KEY + "&query=" + encodedQuery;
-
-        URL url = new URL(apiUrl);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-
-        if (conn.getResponseCode() != 200) {
-            throw new IOException("Server returned HTTP response code: " + conn.getResponseCode() + " for URL: " + apiUrl);
-        }
-
-        InputStreamReader reader = new InputStreamReader(conn.getInputStream());
-        JsonObject response = JsonParser.parseReader(reader).getAsJsonObject();
-        JsonArray results = response.getAsJsonArray("results");
-
-        List<Map<String, Object>> movies = new ArrayList<>();
-        for (int i = 0; i < results.size(); i++) {
-            JsonObject movieJson = results.get(i).getAsJsonObject();
-            Map<String, Object> movie = new HashMap<>();
-            movie.put("id", movieJson.get("id").getAsInt());
-            movie.put("title", getJsonElementAsString(movieJson.get("title")));
-            movie.put("overview", getJsonElementAsString(movieJson.get("overview")));
-            movie.put("release_date", getJsonElementAsString(movieJson.get("release_date")));
-            movie.put("original_language", getJsonElementAsString(movieJson.get("original_language")));
-            movie.put("popularity", movieJson.get("popularity").getAsDouble());
-            movie.put("vote_average", movieJson.get("vote_average").getAsDouble());
-            movie.put("vote_count", movieJson.get("vote_count").getAsInt());
-            movie.put("poster_path", movieJson.has("poster_path") && !movieJson.get("poster_path").isJsonNull() ? movieJson.get("poster_path").getAsString() : null);
-            JsonArray genreIds = movieJson.getAsJsonArray("genre_ids");
-            List<Integer> genres = new ArrayList<>();
-            for (int j = 0; j < genreIds.size(); j++) {
-                genres.add(genreIds.get(j).getAsInt());
+        int page = 1;
+        if (req.getParameter("page") != null && !req.getParameter("page").isEmpty()) {
+            try {
+                page = Integer.parseInt(req.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
             }
-            movie.put("genre_ids", genres);
-            movies.add(movie);
         }
 
+        // Use Service to fetch data with pagination
+        SearchResult searchResult = movieService.searchMovies(query, page);
+        List<Movie> movies = searchResult.getMovies();
+
+        // In-memory filtering (Note: filtering happens on the current page of results returned by API)
         if (genre != null && !genre.isEmpty()) {
             int genreId = Integer.parseInt(genre);
-            movies.removeIf(movie -> !((List<Integer>) movie.get("genre_ids")).contains(genreId));
+            movies.removeIf(movie -> movie.getGenre_ids() == null || !movie.getGenre_ids().contains(genreId));
         }
 
+        // In-memory sorting
         if (sortBy != null && !sortBy.isEmpty()) {
-            Comparator<Map<String, Object>> comparator;
+            Comparator<Movie> comparator;
             switch (sortBy) {
                 case "popularity":
-                    comparator = Comparator.comparingDouble(movie -> (Double) movie.get("popularity"));
+                    comparator = Comparator.comparingDouble(Movie::getPopularity);
                     break;
                 case "release_date":
-                    comparator = Comparator.comparing(movie -> (String) movie.get("release_date"));
+                    comparator = Comparator.comparing(Movie::getRelease_date);
                     break;
                 case "vote_average":
-                    comparator = Comparator.comparingDouble(movie -> (Double) movie.get("vote_average"));
+                    comparator = Comparator.comparingDouble(Movie::getVote_average);
                     break;
                 case "vote_count":
-                    comparator = Comparator.comparingInt(movie -> (Integer) movie.get("vote_count"));
+                    comparator = Comparator.comparingInt(Movie::getVote_count);
                     break;
                 default:
-                    comparator = Comparator.comparing(movie -> (String) movie.get("title"));
+                    comparator = Comparator.comparing(Movie::getTitle);
             }
             if (sortOrder.equals("desc")) {
                 comparator = comparator.reversed();
@@ -120,25 +89,17 @@ public class MovieSearchServlet extends HttpServlet {
         req.setAttribute("selectedGenre", genre);
         req.setAttribute("selectedSortBy", sortBy);
         req.setAttribute("selectedSortOrder", sortOrder);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", searchResult.getTotalPages());
 
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
-
     /**
-     * Returns the string value of a JsonElement if it is not null and not a JsonNull element.
+     * Helper method to generate a map of genre IDs to genre names.
+     * This is used to populate the genre dropdown in the UI and map IDs in results.
      *
-     * @param element the JsonElement to retrieve the string value from
-     * @return the string value of the JsonElement, or an empty string if the element is null or a JsonNull element
-     */
-    private String getJsonElementAsString(JsonElement element) {
-        return element != null && !element.isJsonNull() ? element.getAsString() : "";
-    }
-
-    /**
-     * Returns a mapping of genre IDs to their corresponding genre names.
-     *
-     * @return A HashMap containing mappings of genre IDs (Integer) to genre names (String).
+     * @return A map containing Genre ID as Key and Genre Name as Value.
      */
     private Map<Integer, String> getGenreMap() {
         Map<Integer, String> genreMap = new HashMap<>();
