@@ -16,6 +16,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The MovieService class provides methods to interact with the Movie Database API (TMDb).
@@ -29,6 +31,9 @@ public class MovieService {
     private static final String DISCOVER_URL = "https://api.themoviedb.org/3/discover/movie?api_key=" + API_KEY;
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
     private static final String MOVIE_REVIEWS_URL = "https://api.themoviedb.org/3/movie/";
+
+    // Simple in-memory cache to store movie details
+    private final Map<Integer, Movie> movieCache = new ConcurrentHashMap<>();
 
     /**
      * Searches for movies based on the provided query string and page number.
@@ -130,21 +135,20 @@ public class MovieService {
 
     /**
      * Retrieves details of a specific movie identified by its ID.
-     * This method fetches comprehensive information including:
-     * <ul>
-     * <li>Basic details (title, overview, release date, etc.)</li>
-     * <li>Genres</li>
-     * <li>YouTube Trailer key (via append_to_response)</li>
-     * <li>Top Cast members (via append_to_response)</li>
-     * <li>Similar movie recommendations (via append_to_response)</li>
-     * <li>Reviews</li>
-     * </ul>
+     * Checks the cache first; if not found, fetches from the API and caches the result.
      *
      * @param movieId The unique identifier of the movie.
      * @return A {@link Movie} object populated with all details, or null if an error occurs.
      */
     public Movie getMovieDetails(int movieId) {
+        // Check cache first
+        if (movieCache.containsKey(movieId)) {
+            System.out.println("Fetching movie details from CACHE for ID: " + movieId);
+            return movieCache.get(movieId);
+        }
+
         try {
+            System.out.println("Fetching movie details from API for ID: " + movieId);
             // Using append_to_response to get videos, credits, and recommendations in a single HTTP request
             URL url = new URL(MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=videos,credits,recommendations");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -219,6 +223,11 @@ public class MovieService {
             // Fetch Reviews separately
             List<Review> reviews = getMovieReviews(movieId);
             movie.setReviews(reviews);
+
+            // Store in cache
+            if (movie != null) {
+                movieCache.put(movieId, movie);
+            }
 
             return movie;
         } catch (Exception e) {
